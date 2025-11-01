@@ -24,11 +24,13 @@ public class SimulateController {
         int latencyP50 = simulationService.calculateLatencyP50(normalizedNodes, scenario.edges());
         int latencyP95 = simulationService.calculateLatencyP95(latencyP50, normalizedNodes);
         int throughput = simulationService.calculateThroughput(normalizedNodes);
+        double failureRate = simulationService.calculateFailureRate(normalizedNodes);
         double costPerHour = simulationService.calculateCost(normalizedNodes);
         return new SimulationResultDto(
             latencyP50,
             latencyP95,
             throughput,
+            failureRate,
             costPerHour,
             "ok"
         );
