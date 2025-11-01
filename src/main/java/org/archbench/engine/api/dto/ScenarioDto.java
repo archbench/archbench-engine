@@ -7,6 +7,14 @@ public record ScenarioDto(
     List<Node> nodes,
     List<Edge> edges
 ) {
-    public record Node(String id, String type) {}
+    public record Node(
+        String id,
+        String type,
+        Integer latencyMs,
+        Double varianceFactor,
+        Integer capacityRps,
+        Double failureRate,
+        Double costPerHour
+    ) {}
     public record Edge(String from, String to) {}
 }

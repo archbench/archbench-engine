@@ -1,7 +1,10 @@
 package org.archbench.engine.api;
 
+import java.util.List;
+
 import org.archbench.engine.api.dto.ScenarioDto;
 import org.archbench.engine.api.dto.SimulationResultDto;
+import org.archbench.engine.core.SimulationService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,19 +12,28 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SimulateController {
 
+    private final SimulationService simulationService;
+
+    public SimulateController(SimulationService simulationService) {
+        this.simulationService = simulationService;
+    }
+
     @PostMapping("/simulate")
-    public SimulationResultDto simulate(@RequestBody ScenarioDto scenario){
-        // TODO: deterministic simulation engine later
-
-        System.out.println("Scenario received: " + scenario.name());
-
+    public SimulationResultDto simulate(@RequestBody ScenarioDto scenario) {
+        List<ScenarioDto.Node> normalizedNodes = simulationService.normalizeNodes(scenario.nodes());
+        int latencyP50 = simulationService.calculateLatencyP50(normalizedNodes, scenario.edges());
+        int latencyP95 = simulationService.calculateLatencyP95(latencyP50, normalizedNodes);
+        int throughput = simulationService.calculateThroughput(normalizedNodes);
+        double failureRate = simulationService.calculateFailureRate(normalizedNodes);
+        double costPerHour = simulationService.calculateCost(normalizedNodes);
         return new SimulationResultDto(
-                50,   // p50 ms
-                120,  // p95 ms
-                2000, // req/s
-                0.12, // cost/hour $
-                "mock-ok"
+            latencyP50,
+            latencyP95,
+            throughput,
+            failureRate,
+            costPerHour,
+            "ok"
         );
     }
-    
+
 }
