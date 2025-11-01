@@ -8,12 +8,12 @@ import java.util.List;
 import org.archbench.engine.api.dto.ScenarioDto;
 import org.junit.jupiter.api.Test;
 
-class SimulationServiceTest {
+public class SimulationServiceTest {
 
     private final SimulationService simulationService = new SimulationService();
 
     @Test
-    void urlShortenerScenarioProducesDeterministicMetrics() {
+    public void urlShortenerScenarioProducesDeterministicMetrics() {
         List<ScenarioDto.Node> nodes = List.of(
             new ScenarioDto.Node("client", "client", null, null, null, null, null),
             new ScenarioDto.Node("api", "service", null, null, null, null, null),
