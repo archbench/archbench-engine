@@ -30,13 +30,19 @@ public class SimulateController {
         int throughput = simulationService.calculateThroughput(normalizedNodes);
         double failureRate = simulationService.calculateFailureRate(normalizedNodes);
         double costPerHour = simulationService.calculateCost(normalizedNodes);
+        String status = failureRate > 0.05 ? "degraded" : "ok";
+        int score = Math.max(0, Math.min(100, 100 - (int) Math.round(failureRate * 100)));
+        List<String> hints = failureRate > 0.05
+            ? List.of("Failure rate exceeds 5%; consider adding redundancy.")
+            : List.of();
         return new SimulationResultDto(
             latencyP50,
             latencyP95,
             throughput,
-            failureRate,
             costPerHour,
-            "ok"
+            status,
+            score,
+            hints
         );
     }
 

@@ -10,12 +10,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class SimulationService {
 
-    private static final Map<String, NodeDefaults> DEFAULTS = Map.of(
-        "client", new NodeDefaults(2, 1.1, Integer.MAX_VALUE, 0.001, 0.00),
-        "service", new NodeDefaults(8, 1.5, 3000, 0.005, 0.05),
-        "cache", new NodeDefaults(1, 1.1, 50000, 0.002, 0.02),
-        "database", new NodeDefaults(12, 2.0, 2000, 0.010, 0.30),
-        "queue", new NodeDefaults(2, 1.2, 10000, 0.003, 0.01)
+    private static final Map<String, NodeDefaults> DEFAULTS = Map.ofEntries(
+        Map.entry("client", new NodeDefaults(2, 1.1, Integer.MAX_VALUE, 0.001, 0.00)),
+        Map.entry("service", new NodeDefaults(8, 1.5, 3000, 0.005, 0.05)),
+        Map.entry("cache", new NodeDefaults(1, 1.1, 50000, 0.002, 0.02)),
+        Map.entry("database", new NodeDefaults(12, 2.0, 2000, 0.010, 0.30)),
+        Map.entry("queue", new NodeDefaults(2, 1.2, 10000, 0.003, 0.01)),
+        Map.entry("gateway", new NodeDefaults(6, 1.4, 4000, 0.004, 0.06)),
+        Map.entry("cdn", new NodeDefaults(3, 1.1, 60000, 0.001, 0.05)),
+        Map.entry("objectstore", new NodeDefaults(15, 2.2, 1500, 0.008, 0.25)),
+        Map.entry("search", new NodeDefaults(10, 1.8, 2500, 0.006, 0.20)),
+        Map.entry("stream", new NodeDefaults(6, 1.4, 5000, 0.005, 0.10)),
+        Map.entry("lb", new NodeDefaults(3, 1.1, 50000, 0.001, 0.03)),
+        Map.entry("worker", new NodeDefaults(7, 1.6, 3500, 0.004, 0.07))
     );
 
     public List<ScenarioDto.Node> normalizeNodes(List<ScenarioDto.Node> nodes) {
@@ -95,7 +102,8 @@ public class SimulationService {
             variance,
             capacity,
             failureRate,
-            cost
+            cost,
+            node.dbConfig()
         );
     }
 }

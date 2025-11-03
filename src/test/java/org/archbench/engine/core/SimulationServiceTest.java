@@ -15,10 +15,10 @@ public class SimulationServiceTest {
     @Test
     public void urlShortenerScenarioProducesDeterministicMetrics() {
         List<ScenarioDto.Node> nodes = List.of(
-            new ScenarioDto.Node("client", "client", null, null, null, null, null),
-            new ScenarioDto.Node("api", "service", null, null, null, null, null),
-            new ScenarioDto.Node("cache", "cache", null, null, null, null, null),
-            new ScenarioDto.Node("db", "database", null, null, null, null, null)
+            new ScenarioDto.Node("client", "client", null, null, null, null, null, null),
+            new ScenarioDto.Node("api", "service", null, null, null, null, null, null),
+            new ScenarioDto.Node("cache", "cache", null, null, null, null, null, null),
+            new ScenarioDto.Node("db", "database", null, null, null, null, null, null)
         );
         List<ScenarioDto.Edge> edges = List.of(
             new ScenarioDto.Edge("client", "api"),
@@ -34,6 +34,7 @@ public class SimulationServiceTest {
                 && node.capacityRps() != null
                 && node.failureRate() != null
                 && node.costPerHour() != null
+                && node.dbConfig() == null
         ));
 
         int latencyP50 = simulationService.calculateLatencyP50(normalizedNodes, edges);

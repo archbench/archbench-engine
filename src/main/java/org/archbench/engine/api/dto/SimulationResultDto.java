@@ -1,11 +1,13 @@
 package org.archbench.engine.api.dto;
 
+import java.util.List;
+
 public record SimulationResultDto( 
         int latencyMsP50,
         int latencyMsP95,
         int throughputRps,
-        double failureRate,
         double costPerHour,
-        String status) {
-    
+        String status,
+        Integer score,
+        List<String> hints) {
 }
