@@ -1,0 +1,209 @@
+openapi: 3.0.3
+info:
+  title: ArchBench Engine API
+  version: 0.1.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Engine is reachable
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: ok
+  /simulate:
+    post:
+      summary: Run architecture simulation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Scenario'
+      responses:
+        '200':
+          description: Simulation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimulationResult'
+        '400':
+          description: Invalid scenario definition
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetail'
+components:
+  schemas:
+    Scenario:
+      type: object
+      required:
+        - name
+        - nodes
+        - edges
+      properties:
+        name:
+          type: string
+        workload:
+          type: object
+          properties:
+            rps:
+              type: integer
+              minimum: 0
+            p95TargetMs:
+              type: integer
+              minimum: 0
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Node'
+        edges:
+          type: array
+          items:
+            $ref: '#/components/schemas/Edge'
+    Node:
+      type: object
+      required:
+        - id
+        - type
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+            - client
+            - service
+            - cache
+            - database
+            - queue
+            - gateway
+            - cdn
+            - objectstore
+            - search
+            - stream
+            - lb
+            - worker
+        latencyMs:
+          type: integer
+          minimum: 0
+        varianceFactor:
+          type: number
+          minimum: 0
+        capacityRps:
+          type: integer
+          minimum: 0
+        failureRate:
+          type: number
+          minimum: 0
+          maximum: 1
+        costPerHour:
+          type: number
+          minimum: 0
+        dbConfig:
+          $ref: '#/components/schemas/DbConfig'
+    DbConfig:
+      type: object
+      properties:
+        engine:
+          type: string
+          enum:
+            - postgres
+            - mysql
+            - dynamodb
+            - mongo
+        tables:
+          type: array
+          items:
+            $ref: '#/components/schemas/DbTable'
+    DbTable:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        sizeClass:
+          type: string
+          enum:
+            - S
+            - M
+            - L
+        indexes:
+          type: array
+          items:
+            type: string
+        columns:
+          type: array
+          items:
+            $ref: '#/components/schemas/DbColumn'
+    DbColumn:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - string
+            - number
+            - boolean
+            - json
+    Edge:
+      type: object
+      required:
+        - from
+        - to
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+    SimulationResult:
+      type: object
+      required:
+        - latencyMsP50
+        - latencyMsP95
+        - throughputRps
+        - costPerHour
+        - status
+      properties:
+        latencyMsP50:
+          type: integer
+          minimum: 0
+        latencyMsP95:
+          type: integer
+          minimum: 0
+        throughputRps:
+          type: integer
+          minimum: 0
+        costPerHour:
+          type: number
+          minimum: 0
+        status:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        hints:
+          type: array
+          items:
+            type: string
+    ProblemDetail:
+      type: object
+      properties:
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
