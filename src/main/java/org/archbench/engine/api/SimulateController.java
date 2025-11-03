@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.archbench.engine.api.dto.ScenarioDto;
 import org.archbench.engine.api.dto.SimulationResultDto;
+import org.archbench.engine.core.ScenarioValidator;
 import org.archbench.engine.core.SimulationService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,13 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class SimulateController {
 
     private final SimulationService simulationService;
+    private final ScenarioValidator scenarioValidator;
 
-    public SimulateController(SimulationService simulationService) {
+    public SimulateController(SimulationService simulationService, ScenarioValidator scenarioValidator) {
         this.simulationService = simulationService;
+        this.scenarioValidator = scenarioValidator;
     }
 
     @PostMapping("/simulate")
     public SimulationResultDto simulate(@RequestBody ScenarioDto scenario) {
+        scenarioValidator.validate(scenario);
         List<ScenarioDto.Node> normalizedNodes = simulationService.normalizeNodes(scenario.nodes());
         int latencyP50 = simulationService.calculateLatencyP50(normalizedNodes, scenario.edges());
         int latencyP95 = simulationService.calculateLatencyP95(latencyP50, normalizedNodes);
