@@ -64,7 +64,7 @@ class SimulateApiTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidScenarioJson))
             .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.title").value("400 BAD_REQUEST"))
+            .andExpect(jsonPath("$.title").value("Invalid scenario"))
             .andExpect(jsonPath("$.detail").value("Edge 'to' not found: ghost"));
     }
 }
