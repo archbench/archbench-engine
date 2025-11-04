@@ -94,6 +94,11 @@ public class SimulationService {
         Integer capacity = node.capacityRps() != null ? node.capacityRps() : defaults.capacityRps();
         Double failureRate = node.failureRate() != null ? node.failureRate() : defaults.failureRate();
         Double cost = node.costPerHour() != null ? node.costPerHour() : defaults.costPerHour();
+        if ("database".equals(node.type())) {
+            DbAdjustments adjustments = computeDbAdjustments(node);
+            latency = (int) Math.round(latency * adjustments.latencyMultiplier());
+            capacity = (int) Math.round(capacity * adjustments.capacityMultiplier());
+        }
 
         return new ScenarioDto.Node(
             node.id(),
@@ -105,5 +110,67 @@ public class SimulationService {
             cost,
             node.dbConfig()
         );
+    }
+
+    private DbAdjustments computeDbAdjustments(ScenarioDto.Node node) {
+        ScenarioDto.DbConfig config = node.dbConfig();
+        if (config == null) {
+            return DbAdjustments.NEUTRAL;
+        }
+
+        double latencyMultiplier = 1.0;
+        double capacityMultiplier = 1.0;
+
+        List<ScenarioDto.DbTable> tables = config.tables();
+        if (tables != null && !tables.isEmpty()) {
+            Double worstLatency = null;
+            Double worstCapacity = null;
+            for (ScenarioDto.DbTable table : tables) {
+                if (table == null) {
+                    continue;
+                }
+                double tableLatency = 1.0;
+                double tableCapacity = 1.0;
+                String sizeClass = table.sizeClass();
+                if ("S".equals(sizeClass)) {
+                    tableLatency *= 0.9;
+                    tableCapacity *= 1.1;
+                } else if ("L".equals(sizeClass)) {
+                    tableLatency *= 1.2;
+                    tableCapacity *= 0.8;
+                } else if ("M".equals(sizeClass) || sizeClass == null) {
+                    // neutral
+                }
+                List<String> indexes = table.indexes();
+                if (indexes != null && !indexes.isEmpty()) {
+                    tableLatency *= 0.9;
+                }
+                worstLatency = worstLatency == null ? tableLatency : Math.max(worstLatency, tableLatency);
+                worstCapacity = worstCapacity == null ? tableCapacity : Math.min(worstCapacity, tableCapacity);
+            }
+            if (worstLatency != null) {
+                latencyMultiplier = worstLatency;
+            }
+            if (worstCapacity != null) {
+                capacityMultiplier = worstCapacity;
+            }
+        }
+
+        String engine = config.engine();
+        if ("mongo".equals(engine)) {
+            latencyMultiplier *= 0.95;
+            capacityMultiplier *= 1.05;
+        } else if ("dynamodb".equals(engine)) {
+            latencyMultiplier *= 0.85;
+            capacityMultiplier *= 1.20;
+        } else if ("postgres".equals(engine) || "mysql".equals(engine)) {
+            // neutral
+        }
+
+        return new DbAdjustments(latencyMultiplier, capacityMultiplier);
+    }
+
+    private record DbAdjustments(double latencyMultiplier, double capacityMultiplier) {
+        private static final DbAdjustments NEUTRAL = new DbAdjustments(1.0, 1.0);
     }
 }
