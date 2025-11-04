@@ -4,6 +4,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 .DS_Store
+.m2/
+.m2repo/
 
 ### STS ###
 .apt_generated

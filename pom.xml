@@ -29,8 +29,6 @@
 	<properties>
 		<java.version>21</java.version>
 		<maven.compiler.release>21</maven.compiler.release>
-		 <maven.compiler.fork>true</maven.compiler.fork>
-		 <maven.compiler.executable>${JAVA_HOME}/bin/javac</maven.compiler.executable>
 	</properties>
 	<dependencies>
 		<dependency>
