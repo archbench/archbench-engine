@@ -194,10 +194,12 @@ components:
           type: integer
           minimum: 0
           maximum: 100
+          description: Composite score (0-100) comparing throughput/p95 to workload targets.
         hints:
           type: array
           items:
             type: string
+          description: Suggestions for improving scenarios when workload targets are unmet.
     ProblemDetail:
       type: object
       properties:

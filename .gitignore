@@ -6,6 +6,7 @@ target/
 .DS_Store
 .m2/
 .m2repo/
+.m2-cache/
 
 ### STS ###
 .apt_generated

@@ -5,6 +5,7 @@ import java.util.List;
 import org.archbench.engine.api.dto.ScenarioDto;
 import org.archbench.engine.api.dto.SimulationResultDto;
 import org.archbench.engine.core.ScenarioValidator;
+import org.archbench.engine.core.SimulationInsights;
 import org.archbench.engine.core.SimulationService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,10 +16,16 @@ public class SimulateController {
 
     private final SimulationService simulationService;
     private final ScenarioValidator scenarioValidator;
+    private final SimulationInsights simulationInsights;
 
-    public SimulateController(SimulationService simulationService, ScenarioValidator scenarioValidator) {
+    public SimulateController(
+        SimulationService simulationService,
+        ScenarioValidator scenarioValidator,
+        SimulationInsights simulationInsights
+    ) {
         this.simulationService = simulationService;
         this.scenarioValidator = scenarioValidator;
+        this.simulationInsights = simulationInsights;
     }
 
     @PostMapping("/simulate")
@@ -30,11 +37,9 @@ public class SimulateController {
         int throughput = simulationService.calculateThroughput(normalizedNodes);
         double failureRate = simulationService.calculateFailureRate(normalizedNodes);
         double costPerHour = simulationService.calculateCost(normalizedNodes);
-        String status = failureRate > 0.05 ? "degraded" : "ok";
-        int score = Math.max(0, Math.min(100, 100 - (int) Math.round(failureRate * 100)));
-        List<String> hints = failureRate > 0.05
-            ? List.of("Failure rate exceeds 5%; consider adding redundancy.")
-            : List.of();
+        String status = simulationInsights.deriveStatus(scenario, latencyP95, throughput, failureRate);
+        int score = simulationInsights.calculateScore(scenario, latencyP95, throughput, failureRate);
+        List<String> hints = simulationInsights.generateHints(scenario, latencyP95, throughput, failureRate);
         return new SimulationResultDto(
             latencyP50,
             latencyP95,
